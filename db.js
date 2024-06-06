@@ -23,7 +23,7 @@ export const dbApi = createApi({
         const notes = JSON.parse(serializedNotes);
         
         if (searchString == "") { 
-          return { data: notes }
+          return { data: notes || [] }
         } else {
           const filteredNotes = notes.filter(note => {
             const { title, content } = note;
