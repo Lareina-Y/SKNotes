@@ -8,6 +8,7 @@ import { PaperProvider } from 'react-native-paper';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 // Home Screen
 function HomeScreen({ navigation }) {
@@ -66,32 +67,27 @@ function AddNoteScreen({ navigation }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [addNote] = useAddNoteMutation();
-  const [showError, setShowError] = useState(false);
   
   const handleSaveNote = async () => {
-    if (title != '' && content != '') {
-      setShowError(false);
+    if (title != '' || content != '') {
       const newNote = { 
         title: title, 
         content: content,  
       };
       await addNote(newNote);
-      navigation.goBack();
-    } else {
-      setShowError(true);
-    }
+    } 
   };
 
+  // Save the note when navigating back
   useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={handleSaveNote}>
-          <Text style={tw`text-white text-center text-xl mt--1`}>Save</Text>
-        </TouchableOpacity>
-      ),
+    // Listen for beforeRemove event to trigger saveNote
+    const backHome = navigation.addListener('beforeRemove', (e) => {
+        handleSaveNote();
     });
-  });
 
+    // Clean up the listener when component unmounts
+    return backHome;
+  });
 
   return (
     <View style={tw`flex-1 bg-black text-white pt-15`}>
@@ -111,7 +107,6 @@ function AddNoteScreen({ navigation }) {
         onChangeText={setContent}
         multiline
       />
-      {showError && <Text style={tw`p-3 ml-4 mr-4 mb-2 text-white`}>The Title and Content cannot be empty !</Text>}
     </View>
   );
 }
@@ -135,15 +130,15 @@ function EditNoteScreen({ navigation, route }) {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={handleDeleteNote}>
-          <Text style={tw`text-white text-center text-xl mt--1`}>Delete</Text>
+          <Ionicons name="trash" size={24} color="white" />
         </TouchableOpacity>
       ),
     });
   });
 
-  // Auto update the note
+  // Auto save the note
   useEffect(() => {
-    if (title != '' && content != '') {
+    if (title != '' || content != '') {
       setShowError(false);
       const updatedNote = { id: note.id, title: title, content: content };
       updateNote(updatedNote);
