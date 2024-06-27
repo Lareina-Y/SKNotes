@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 // Home Screen
 function HomeScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: notes} = useSearchNotesQuery(searchQuery);
+  const { data: notes } = useSearchNotesQuery(searchQuery);
 
   const handleNotePress = (note) => {
     navigation.navigate('EditNote', { note });
@@ -81,13 +81,13 @@ function AddNoteScreen({ navigation }) {
   // Save the note when navigating back
   useEffect(() => {
     // Listen for beforeRemove event to trigger saveNote
-    const backHome = navigation.addListener('beforeRemove', (e) => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
         handleSaveNote();
     });
 
     // Clean up the listener when component unmounts
-    return backHome;
-  });
+    return unsubscribe;
+  }, [navigation, title, content]);
 
   return (
     <View style={tw`flex-1 bg-black text-white pt-15`}>
@@ -179,7 +179,8 @@ export default function App() {
     <Provider store={store}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Notes">
-          <Stack.Screen options={{ headerShown: false }}
+          <Stack.Screen 
+            options={{ headerShown: false }}
             name="Notes" 
             component={HomeScreen} 
           />
